@@ -11,6 +11,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Highsync">
 <link rel="apple-touch-icon" href="icon-192.png">
+<!-- Umami Analytics -->
+<script defer src="https://umami-pi-two.vercel.app/script.js" data-website-id="3f57ae1d-62f2-4b50-b3dd-7d8732fbf726"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -19,7 +21,7 @@
   --bg:#0d0d0f;--bg2:#141417;--bg3:#1c1c21;--bg4:#222228;
   --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
   --text:#e8e8ec;--text2:#7a7a8a;--text3:#4a4a5a;
-  --accent:#5b8ff9;--accent-dim:rgba(91,143,249,0.14);
+  --accent:#79797a;--accent-dim:rgba(121,121,122,0.14);
   --yellow:#f5d76e;--yellow-dim:rgba(245,215,110,0.10);
   --red:#ff5a5a;--green:#5af5a0;
   --shadow:0 4px 24px rgba(0,0,0,0.5);--shadow-lg:0 12px 48px rgba(0,0,0,0.7);
@@ -29,7 +31,7 @@
   --bg:#f4f4f0;--bg2:#ffffff;--bg3:#ebebeb;--bg4:#e0e0dc;
   --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.13);
   --text:#18181c;--text2:#6a6a7a;--text3:#aaaaaa;
-  --accent:#3a6ae8;--accent-dim:rgba(58,106,232,0.12);
+  --accent:#79797a;--accent-dim:rgba(121,121,122,0.12);
   --shadow:0 4px 24px rgba(0,0,0,0.08);--shadow-lg:0 12px 48px rgba(0,0,0,0.18);
 }
 html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s;overflow:hidden}
@@ -99,7 +101,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .empty-sub{font-size:13px;color:var(--text2);max-width:280px;line-height:1.5}
 
 /* ── DROP ── */
-.drop-overlay{position:fixed;inset:0;background:rgba(91,143,249,.07);border:2px dashed var(--accent);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:16px;font-weight:600;color:var(--accent);backdrop-filter:blur(4px)}
+.drop-overlay{position:fixed;inset:0;background:rgba(121,121,122,.07);border:2px dashed var(--accent);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:16px;font-weight:600;color:var(--accent);backdrop-filter:blur(4px)}
 .drop-overlay.visible{display:flex}
 
 /* ── BOOK HEADER ── */
@@ -172,6 +174,19 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 
 /* ── BOOK GRID (overview + search) ── */
 .books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px;margin-bottom:28px}
+
+
+/* ── KINDLE DETECTOR ── */
+.kindle-banner{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:900;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.kindle-banner.show{transform:translateX(-50%) translateY(0)}
+.kindle-banner-icon{width:32px;height:32px;background:var(--accent-dim);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0}
+.kindle-banner-text{display:flex;flex-direction:column;gap:1px}
+.kindle-banner-title{font-size:13px;font-weight:600;color:var(--text)}
+.kindle-banner-sub{font-size:11px;color:var(--text2)}
+.kindle-banner-btn{padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;flex-shrink:0}
+.kindle-banner-btn:hover{opacity:.85}
+.kindle-banner-close{background:none;border:none;color:var(--text3);cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kindle-banner-close:hover{color:var(--text)}
 
 /* ── FLIP CARD ── */
 .flip-card{cursor:pointer;height:370px}
@@ -3792,5 +3807,20 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<div class="kindle-banner" id="kindleBanner">
+  <div class="kindle-banner-icon">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+  </div>
+  <div class="kindle-banner-text">
+    <div class="kindle-banner-title">Kindle detected</div>
+    <div class="kindle-banner-sub">Import your highlights now</div>
+  </div>
+  <button class="kindle-banner-btn" id="kindleBannerBtn">Open My Clippings</button>
+  <button class="kindle-banner-close" id="kindleBannerClose">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
+
 </body>
 </html>
